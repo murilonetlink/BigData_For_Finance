@@ -20,6 +20,7 @@ from ai_analyst import (
     build_context_dfc,
     _prompt_dfc,
 )
+from glossary import chart_tooltip
 
 def formatar_moeda_br(valor):
     if pd.isna(valor):
@@ -76,7 +77,7 @@ def _show_table(df_input, titulo, cols_dates):
                  column_config=col_cfg, height=altura)
 
 def _render_fluxos(df_pivot, cols_dates, scale_option):
-    st.subheader("Fluxos de Caixa por Atividade")
+    st.subheader("Fluxos de Caixa por Atividade", help=chart_tooltip("fluxos_dfc"))
 
     # Tenta identificar as três atividades principais
     config_fluxos = [
@@ -111,7 +112,7 @@ def _render_fluxos(df_pivot, cols_dates, scale_option):
     st.plotly_chart(fig, use_container_width=True)
 
 def _render_fcf(df_pivot, cols_dates, scale_option):
-    st.subheader("Free Cash Flow (FCO − |FCI|)")
+    st.subheader("Free Cash Flow (FCO − |FCI|)", help=chart_tooltip("fcf_dfc"))
 
     fco = _get_conta(df_pivot, "6.01", cols_dates)
     fci = _get_conta(df_pivot, "6.02", cols_dates)
@@ -150,7 +151,7 @@ def _render_fcf(df_pivot, cols_dates, scale_option):
     st.plotly_chart(fig, use_container_width=True)
 
 def _render_cascata_caixa(df_pivot, cols_dates, scale_option):
-    st.subheader("Composição da Variação de Caixa (último período)")
+    st.subheader("Composição da Variação de Caixa (último período)", help=chart_tooltip("cascata_caixa_dfc"))
 
     dt_ref = cols_dates[-1]
     config = [
@@ -202,7 +203,7 @@ def _render_caixa_acumulado(df_pivot, cols_dates, scale_option):
     if fco.abs().sum() == 0 or len(cols_dates) < 2:
         return
 
-    st.subheader("FCO Acumulado no Período Analisado")
+    st.subheader("FCO Acumulado no Período Analisado", help=chart_tooltip("caixa_acumulado_dfc"))
 
     fco_cum = fco.cumsum()
     cores = [PALETA[2] if v >= 0 else PALETA[7] for v in fco_cum.values]
@@ -233,7 +234,7 @@ def _render_caixa_acumulado(df_pivot, cols_dates, scale_option):
 
 def _render_bolha_fco_fci(df_pivot, cols_dates, scale_option):
     """Scatter: FCO (x) vs FCI (y), tamanho = variação absoluta total."""
-    st.subheader("FCO vs FCI — Dispersão Temporal")
+    st.subheader("FCO vs FCI — Dispersão Temporal", help=chart_tooltip("bolha_fco_fci_dfc"))
 
     fco = _get_conta(df_pivot, "6.01", cols_dates)
     fci = _get_conta(df_pivot, "6.02", cols_dates)

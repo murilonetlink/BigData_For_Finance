@@ -16,7 +16,7 @@ from ai_analyst import (
     build_context_indicadores,
     _prompt_indicadores,
 )
-from glossary import tooltip
+from glossary import tooltip, chart_tooltip
 
 
 MAPA_VARIAVEIS = {
@@ -162,7 +162,7 @@ def render_cards_ciclos(df):
     with c5: card_metric("Ciclo Financeiro", fmt_dias(cf),   help_text=tooltip("CICLO_FINANCEIRO"))
 
 def render_grafico_resultado(df):
-    st.subheader("Receita Líquida vs Lucro Líquido")
+    st.subheader("Receita Líquida vs Lucro Líquido", help=chart_tooltip("grafico_resultado"))
 
     df_p = df[["DT_REFER","V16","V23"]].dropna(subset=["V16"]).sort_values("DT_REFER").copy()
     df_p["DT"] = df_p["DT_REFER"].astype(str)
@@ -207,7 +207,7 @@ def render_grafico_resultado(df):
     st.plotly_chart(fig, use_container_width=True)
 
 def render_grafico_margens(df):
-    st.subheader("Evolução das Margens")
+    st.subheader("Evolução das Margens", help=chart_tooltip("grafico_margens"))
 
     config = {
         "MARGEM_BRUTA":   ("Margem Bruta",   CORES["verde"]),
@@ -239,7 +239,7 @@ def render_grafico_margens(df):
     st.plotly_chart(fig, use_container_width=True)
 
 def render_grafico_composicao_ativo(df):
-    st.subheader("Composição do Ativo Total")
+    st.subheader("Composição do Ativo Total", help=chart_tooltip("grafico_composicao_ativo"))
 
     cols = list(CORES_ATIVO.keys())
     df_p = df[["DT_REFER"] + cols].sort_values("DT_REFER").copy()
@@ -262,7 +262,7 @@ def render_grafico_composicao_ativo(df):
     st.plotly_chart(fig, use_container_width=True)
 
 def render_grafico_intangivel(df):
-    st.subheader("Intangível sobre Ativo Total")
+    st.subheader("Intangível sobre Ativo Total", help=chart_tooltip("grafico_intangivel"))
 
     df_p = df[["DT_REFER","V00","V08"]].dropna(subset=["V00","V08"]).sort_values("DT_REFER").copy()
     df_p["DT"]         = df_p["DT_REFER"].astype(str)
@@ -303,7 +303,7 @@ def render_grafico_intangivel(df):
     st.plotly_chart(fig, use_container_width=True)
 
 def render_grafico_ncg(df):
-    st.subheader("Necessidade de Capital de Giro (NCG)")
+    st.subheader("Necessidade de Capital de Giro (NCG)", help=chart_tooltip("grafico_ncg"))
 
     config_ncg = {
         "NCG": ("NCG",               CORES["roxo"],   "bar"),

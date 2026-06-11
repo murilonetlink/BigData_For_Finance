@@ -19,6 +19,7 @@ from ai_analyst import (
     build_context_dre,
     _prompt_dre,
 )
+from glossary import chart_tooltip
 
 def formatar_moeda_br(valor):
     if pd.isna(valor):
@@ -76,7 +77,7 @@ def _show_table(df_input, titulo, scale_option, cols_dates):
                  column_config=col_cfg, height=altura)
 
 def _render_waterfall(df_pivot, cols_dates, scale_option):
-    st.subheader("Cascata do Resultado (último período)")
+    st.subheader("Cascata do Resultado (último período)", help=chart_tooltip("waterfall_dre"))
 
     dt_ref = cols_dates[-1]
 
@@ -139,7 +140,7 @@ def _render_waterfall(df_pivot, cols_dates, scale_option):
     st.caption(f"Período de referência: **{dt_ref}**")
 
 def _render_evolucao_resultado(df_pivot, cols_dates, scale_option):
-    st.subheader("Evolução Temporal — Receita, Resultado Bruto e Lucro Líquido")
+    st.subheader("Evolução Temporal — Receita, Resultado Bruto e Lucro Líquido", help=chart_tooltip("evolucao_resultado_dre"))
 
     series = {
         "Receita Líquida": ("3.01", PALETA[1]),
@@ -169,7 +170,7 @@ def _render_evolucao_resultado(df_pivot, cols_dates, scale_option):
     st.plotly_chart(fig, use_container_width=True)
 
 def _render_margens(df_pivot, cols_dates):
-    st.subheader("Margens — Evolução Histórica")
+    st.subheader("Margens — Evolução Histórica", help=chart_tooltip("margens_dre"))
 
     receita = _get_conta(df_pivot, "3.01", cols_dates)
     if receita.abs().sum() == 0:
@@ -213,7 +214,7 @@ def _render_crescimento(df_pivot, cols_dates, empresa):
     anos = len(receita) - 1
     cagr = (val_fin / val_ini) ** (1 / anos) - 1 if val_ini > 0 and anos > 0 else 0
 
-    st.subheader(f"Crescimento da Receita — CAGR do período: {cagr:.1%}")
+    st.subheader(f"Crescimento da Receita — CAGR do período: {cagr:.1%}", help=chart_tooltip("crescimento_receita_dre"))
 
     fig = make_subplots(
         rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.18,
@@ -269,7 +270,7 @@ def _render_crescimento(df_pivot, cols_dates, empresa):
 
 def _render_funil_margens(df_pivot, cols_dates, scale_option):
     """Funil de margens no último período — Receita → Bruto → EBIT → Líquido."""
-    st.subheader("Funil de Margens (último período)")
+    st.subheader("Funil de Margens (último período)", help=chart_tooltip("funil_margens_dre"))
     dt_ref = cols_dates[-1]
 
     def val(code):
@@ -317,7 +318,7 @@ def _render_funil_margens(df_pivot, cols_dates, scale_option):
 
 def _render_custo_receita(df_pivot, cols_dates, scale_option):
     """Área empilhada da decomposição de custos em relação à receita."""
-    st.subheader("Decomposição de Custos sobre Receita")
+    st.subheader("Decomposição de Custos sobre Receita", help=chart_tooltip("custo_receita_dre"))
 
     receita = _get_conta(df_pivot, "3.01", cols_dates)
     if receita.abs().sum() == 0:

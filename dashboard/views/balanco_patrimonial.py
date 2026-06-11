@@ -12,6 +12,7 @@ from ai_analyst import (
     build_context_bp,
     _prompt_bp,
 )
+from glossary import chart_tooltip
 
 import numpy as np
 
@@ -37,7 +38,7 @@ def style_validation_row(val):
 
 def _render_sunburst_bp(df_ativo, df_passivo, cols_dates):
     """Sunburst interativo da estrutura patrimonial no último período."""
-    st.subheader("Estrutura Patrimonial")
+    st.subheader("Estrutura Patrimonial", help=chart_tooltip("sunburst_bp"))
     dt_ref = cols_dates[-1]
 
     ids, labels, parents, values, colors = [], [], [], [], []
@@ -85,7 +86,7 @@ def _render_sunburst_bp(df_ativo, df_passivo, cols_dates):
 
 def _render_evolucao_categorias(df_ativo, cols_dates, scale_option):
     """Área empilhada mostrando como as categorias do ativo evoluíram."""
-    st.subheader("Evolução da Composição do Ativo")
+    st.subheader("Evolução da Composição do Ativo", help=chart_tooltip("evolucao_ativo_bp"))
 
     cats = {
         "Caixa / Equiv.":  ("1.01.01", PALETA[0]),
@@ -130,7 +131,7 @@ def _render_evolucao_categorias(df_ativo, cols_dates, scale_option):
 
 def _render_estrutura_capital(df_ativo, df_passivo, cols_dates, scale_option):
     """Barras divergentes: Ativo (positivo) × Passivo+PL (negativo)."""
-    st.subheader("Estrutura de Capital — Ativo vs Passivo")
+    st.subheader("Estrutura de Capital — Ativo vs Passivo", help=chart_tooltip("estrutura_capital_bp"))
 
     cats_ativo = [
         ("1.01", "Ativo Circulante",       PALETA[0]),
@@ -335,7 +336,7 @@ def render_bp_page():
     show_table(df_passivo, "", "Passivo e Patrimônio Líquido")
     st.markdown("###")
 
-    st.subheader("Validação e Crescimento")
+    st.subheader("Validação e Crescimento", help=chart_tooltip("validacao_crescimento_bp"))
     
     eixo_x_str = [str(d) for d in cols_dates] 
 

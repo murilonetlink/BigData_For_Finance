@@ -624,7 +624,8 @@ def render_ai_panel(
             for msg in chat_hist:
                 role = "user" if msg["role"] == "user" else "assistant"
                 with st.chat_message(role):
-                    st.markdown(msg["content"])
+                    # Escapa $ para evitar LaTeX — aplicado tanto no histórico quanto nas respostas novas
+                    st.markdown(msg["content"].replace("$", "\\$"))
 
             # Input do usuário
             user_input = st.chat_input(

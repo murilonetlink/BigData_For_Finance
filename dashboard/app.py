@@ -186,8 +186,96 @@ hr {
 ::-webkit-scrollbar-track { background: var(--azure); }
 ::-webkit-scrollbar-thumb { background: var(--celadon); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--sapphire); }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVO — MOBILE  (≤ 768 px)
+   Não altera nada no desktop; só entra em telas pequenas.
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+    /* ── Área principal — menos padding lateral ── */
+    .block-container {
+        padding-left: 0.75rem  !important;
+        padding-right: 0.75rem !important;
+        padding-top: 1rem      !important;
+    }
+
+    /* ── Títulos menores ── */
+    h1 { font-size: 1.4rem !important; }
+    h2 { font-size: 1.15rem !important; }
+    h3 { font-size: 1rem   !important; }
+
+    /* ── Métricas: fonte menor para caber em colunas ── */
+    [data-testid="stMetricValue"] {
+        font-size: 1.1rem !important;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 0.75rem !important;
+    }
+    [data-testid="stMetricDelta"] {
+        font-size: 0.72rem !important;
+    }
+
+    /* ── Colunas: empilha automaticamente quando muito apertadas ── */
+    /* Força wrap nas colunas de métricas (4+ colunas ficam ilegíveis) */
+    [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+        min-width: 140px !important;
+        flex: 1 1 140px  !important;
+    }
+
+    /* ── Gráficos: garante scroll horizontal se necessário ── */
+    [data-testid="stPlotlyChart"] {
+        overflow-x: auto !important;
+    }
+    [data-testid="stPlotlyChart"] > div {
+        min-width: 300px;
+    }
+
+    /* ── DataFrames: scroll horizontal ── */
+    [data-testid="stDataFrame"] {
+        overflow-x: auto !important;
+    }
+
+    /* ── Expanders: margem menor ── */
+    [data-testid="stExpander"] {
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* ── Botões: largura total ── */
+    .stButton > button {
+        width: 100% !important;
+        margin-bottom: 0.4rem !important;
+    }
+
+    /* ── Selectbox e multiselect: maior área de toque ── */
+    [data-baseweb="select"] > div:first-child {
+        min-height: 44px !important;
+    }
+
+    /* ── Chat input: garante que não saia da tela ── */
+    [data-testid="stChatInput"] {
+        max-width: 100% !important;
+    }
+
+    /* ── Rodapé: empilha verticalmente ── */
+    [data-testid="stHorizontalBlock"]:last-of-type > [data-testid="stColumn"] {
+        min-width: 100% !important;
+        text-align: center !important;
+    }
+
+    /* ── Slider: maior área de toque ── */
+    [data-baseweb="slider"] [role="slider"] {
+        width: 24px  !important;
+        height: 24px !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
+
 
 with st.sidebar:
     st.title("Data Lake CVM")

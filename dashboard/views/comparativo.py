@@ -401,9 +401,6 @@ def render_empresa_vs_setor(cnpj: str, nome_empresa: str, setor: str, data_ref: 
     st.markdown("#### Posicionamento vs Mediana")
     _render_scorecard(emp_row, bench_row)
 
-    st.markdown("#### Evolução Temporal — Margem Líquida vs Setor")
-    _render_evolucao_vs_setor(cnpj, nome_empresa, setor)
-
     # IA
     st.markdown("---")
     ctx = build_context_vs_setor(emp_row, bench_row, nome_empresa, setor, data_ref)
@@ -432,6 +429,13 @@ def render_empresa_vs_todos_setores(cnpj: str, nome_empresa: str, data_ref: str)
     setor_empresa = emp_row.get("SETOR", "—")
 
     st.markdown("#### Heatmap — Indicadores por Setor")
+    st.markdown(
+        '<div class="mobile-heatmap-hint">'
+        '📱 <strong>Dica:</strong> Gire o celular na horizontal ou acesse pelo computador '
+        'para melhor visualização do heatmap.'
+        '</div>',
+        unsafe_allow_html=True,
+    )
     _render_heatmap_setores(df_all, emp_row, nome_empresa, setor_empresa)
     st.markdown("---")
 

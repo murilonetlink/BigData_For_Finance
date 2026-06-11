@@ -205,34 +205,50 @@ hr {
     h2 { font-size: 1.15rem !important; }
     h3 { font-size: 1rem   !important; }
 
-    /* ── Métricas: fonte menor para caber em colunas ── */
-    [data-testid="stMetricValue"] {
-        font-size: 1.1rem !important;
-    }
-    [data-testid="stMetricLabel"] {
-        font-size: 0.75rem !important;
-    }
-    [data-testid="stMetricDelta"] {
-        font-size: 0.72rem !important;
-    }
-
-    /* ── Colunas: empilha automaticamente quando muito apertadas ── */
-    /* Força wrap nas colunas de métricas (4+ colunas ficam ilegíveis) */
+    /* ── Colunas: wrap + 2 por linha (grade 2×2 para métricas) ──
+       O Streamlit seta width inline nos st.Column → precisamos
+       de !important em width também para sobrescrever.           */
     [data-testid="stHorizontalBlock"] {
         flex-wrap: wrap !important;
         gap: 0.5rem !important;
     }
     [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
-        min-width: 140px !important;
-        flex: 1 1 140px  !important;
+        min-width: calc(50% - 0.4rem) !important;
+        max-width: calc(50% - 0.4rem) !important;
+        width:     calc(50% - 0.4rem) !important;
+        flex: 1 1  calc(50% - 0.4rem) !important;
     }
 
-    /* ── Gráficos: garante scroll horizontal se necessário ── */
+    /* ── Métricas: fontes ajustadas para caber em 50% da tela ── */
+    [data-testid="stMetricValue"] {
+        font-size: 1.05rem !important;
+        line-height: 1.2   !important;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 0.72rem !important;
+    }
+    [data-testid="stMetricDelta"] {
+        font-size: 0.70rem !important;
+    }
+
+    /* ── Heatmap: scroll horizontal + aviso mobile ── */
+    .mobile-heatmap-hint {
+        display: block !important;
+        background: #D0E8EE;
+        border-left: 4px solid #1B98E0;
+        padding: 0.6rem 1rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        color: #13293D;
+        margin-bottom: 0.75rem;
+    }
+    /* Container do heatmap: scroll lateral para não esmagar */
     [data-testid="stPlotlyChart"] {
         overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
     }
     [data-testid="stPlotlyChart"] > div {
-        min-width: 300px;
+        min-width: 560px;   /* largura mínima do heatmap antes de scrollar */
     }
 
     /* ── DataFrames: scroll horizontal ── */
@@ -256,15 +272,9 @@ hr {
         min-height: 44px !important;
     }
 
-    /* ── Chat input: garante que não saia da tela ── */
+    /* ── Chat input: não sai da tela ── */
     [data-testid="stChatInput"] {
         max-width: 100% !important;
-    }
-
-    /* ── Rodapé: empilha verticalmente ── */
-    [data-testid="stHorizontalBlock"]:last-of-type > [data-testid="stColumn"] {
-        min-width: 100% !important;
-        text-align: center !important;
     }
 
     /* ── Slider: maior área de toque ── */
@@ -273,6 +283,10 @@ hr {
         height: 24px !important;
     }
 }
+
+/* O aviso de heatmap fica oculto no desktop por padrão */
+.mobile-heatmap-hint { display: none; }
+
 </style>
 """, unsafe_allow_html=True)
 

@@ -9,7 +9,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from database import get_companies_demonstrativo, get_dates_demonstrativo, get_demonstrativo_filtered
+from database import get_dates_demonstrativo, get_demonstrativo_filtered
 from chart_theme import (
     BG_TRANSPARENT, GRID_COLOR, ZERO_LINE_COLOR,
     FONT_COLOR, FONT_COLOR_TITLE, PALETA, FONT_FAMILY, LEGEND_BG,
@@ -76,7 +76,7 @@ def _show_table(df_input, titulo, cols_dates):
                  column_config=col_cfg, height=altura)
 
 def _render_fluxos(df_pivot, cols_dates, scale_option):
-    st.subheader("💵 Fluxos de Caixa por Atividade")
+    st.subheader("Fluxos de Caixa por Atividade")
 
     # Tenta identificar as três atividades principais
     config_fluxos = [
@@ -111,7 +111,7 @@ def _render_fluxos(df_pivot, cols_dates, scale_option):
     st.plotly_chart(fig, use_container_width=True)
 
 def _render_fcf(df_pivot, cols_dates, scale_option):
-    st.subheader("🔋 Free Cash Flow (FCO − |FCI|)")
+    st.subheader("Free Cash Flow (FCO − |FCI|)")
 
     fco = _get_conta(df_pivot, "6.01", cols_dates)
     fci = _get_conta(df_pivot, "6.02", cols_dates)
@@ -150,7 +150,7 @@ def _render_fcf(df_pivot, cols_dates, scale_option):
     st.plotly_chart(fig, use_container_width=True)
 
 def _render_cascata_caixa(df_pivot, cols_dates, scale_option):
-    st.subheader("🌊 Composição da Variação de Caixa (último período)")
+    st.subheader("Composição da Variação de Caixa (último período)")
 
     dt_ref = cols_dates[-1]
     config = [
@@ -202,7 +202,7 @@ def _render_caixa_acumulado(df_pivot, cols_dates, scale_option):
     if fco.abs().sum() == 0 or len(cols_dates) < 2:
         return
 
-    st.subheader("📦 FCO Acumulado no Período Analisado")
+    st.subheader("FCO Acumulado no Período Analisado")
 
     fco_cum = fco.cumsum()
     cores = [PALETA[2] if v >= 0 else PALETA[7] for v in fco_cum.values]
@@ -231,27 +231,63 @@ def _render_caixa_acumulado(df_pivot, cols_dates, scale_option):
     apply_theme(fig, height=360, y_title=f"Valor ({scale_option})", x_is_category=True)
     st.plotly_chart(fig, use_container_width=True)
 
+def _render_bolha_fco_fci(df_pivot, cols_dates, scale_option):
+    """Scatter: FCO (x) vs FCI (y), tamanho = variação absoluta total."""
+    st.subheader("FCO vs FCI — Dispersão Temporal")
+
+    fco = _get_conta(df_pivot, "6.01", cols_dates)
+    fci = _get_conta(df_pivot, "6.02", cols_dates)
+
+    if fco.abs().sum() == 0 or fci.abs().sum() == 0:
+        st.info("FCO ou FCI não disponíveis para o gráfico de dispersão.")
+        return
+
+    fcf = (fco + fci).abs()
+    cores_pts = [PALETA[2] if (fco.iloc[i] > 0 and fci.iloc[i] < 0) else
+                 PALETA[7] if fco.iloc[i] < 0 else PALETA[0]
+                 for i in range(len(cols_dates))]
+
+    fig = go.Figure(go.Scatter(
+        x=fco.values, y=fci.values,
+        mode="markers+text",
+        text=cols_dates,
+        textposition="top center",
+        textfont=dict(size=9, color=FONT_COLOR),
+        marker=dict(
+            size=[max(12, min(50, abs(v) / max(fcf.max(), 1) * 50)) for v in fcf.values],
+            color=cores_pts,
+            opacity=0.80,
+            line=dict(width=1.5, color="rgba(19,41,61,0.15)"),
+        ),
+        hovertemplate="%{text}<br>FCO: %{x:,.2f}<br>FCI: %{y:,.2f}<extra></extra>",
+    ))
+
+    fig.add_hline(y=0, line_dash="dot", line_color=ZERO_LINE_COLOR, line_width=1)
+    fig.add_vline(x=0, line_dash="dot", line_color=ZERO_LINE_COLOR, line_width=1)
+    fig.update_layout(
+        paper_bgcolor=BG_TRANSPARENT, plot_bgcolor=BG_TRANSPARENT,
+        font=dict(family=FONT_FAMILY, color=FONT_COLOR), height=380,
+        xaxis=dict(title_text=f"FCO ({scale_option})", title_font=dict(color=FONT_COLOR),
+                   tickfont=dict(color=FONT_COLOR), gridcolor=GRID_COLOR, zeroline=True),
+        yaxis=dict(title_text=f"FCI ({scale_option})", title_font=dict(color=FONT_COLOR),
+                   tickfont=dict(color=FONT_COLOR), gridcolor=GRID_COLOR, zeroline=True),
+        margin=dict(t=20, b=50, l=60, r=20),
+        hoverlabel=dict(bgcolor="rgba(19,41,61,0.92)", font=dict(color="#E8F1F2")),
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    st.caption("🟢 FCO+ / FCI− (saudável) | 🔴 FCO− (alerta) | tamanho = magnitude do FCF")
+
+
 def render_dfc_page():
 
+    selected_cnpj = st.session_state.get("global_cnpj")
+    selected_label = st.session_state.get("global_label", "")
+    if not selected_cnpj:
+        st.warning("Selecione uma empresa na barra lateral.")
+        return
+
+    tabela_alias = "dfc"   # única tabela disponível no banco
     with st.sidebar:
-        st.header("Filtros — DFC")
-
-        tabela_alias = "dfc"   # única tabela disponível no banco
-        st.markdown("---")
-
-        df_empresas = get_companies_demonstrativo(tabela_alias)
-        if df_empresas.empty:
-            st.warning("Tabela DFC indisponível ou sem dados.")
-            return
-
-        mapa = dict(zip(df_empresas["LABEL_DROPDOWN"], df_empresas["CNPJ_CIA"]))
-        selected_label = st.selectbox(
-            "Empresa:", options=df_empresas["LABEL_DROPDOWN"].tolist(),
-            key="dfc_empresa",
-        )
-        selected_cnpj = mapa[selected_label]
-        st.markdown("---")
-
         df_dates = get_dates_demonstrativo(selected_cnpj, tabela_alias)
         available_dates = df_dates["DT_REFER"].astype(str).tolist()
         if not available_dates:
@@ -279,7 +315,7 @@ def render_dfc_page():
 
     # Cabeçalho
     nome_empresa = selected_label.split(" (")[0]
-    st.title(f"💰 DFC — {nome_empresa}")
+    st.title(f"DFC — {nome_empresa}")
     st.caption(
         f"**CNPJ:** {selected_cnpj} | "
         "Demonstração dos Fluxos de Caixa"
@@ -300,7 +336,7 @@ def render_dfc_page():
     st.markdown("---")
 
     # Tabela completa
-    _show_table(df_pivot, f"💰 Demonstração dos Fluxos de Caixa ({scale_option})", cols_dates)
+    _show_table(df_pivot, f"Demonstração dos Fluxos de Caixa ({scale_option})", cols_dates)
     st.markdown("---")
 
     # Gráficos principais
@@ -318,13 +354,16 @@ def render_dfc_page():
     with col_d:
         _render_caixa_acumulado(df_pivot, cols_dates, scale_option)
 
+    st.markdown("###")
+    _render_bolha_fco_fci(df_pivot, cols_dates, scale_option)
+
     # IA
     st.markdown("---")
     ctx_dfc = build_context_dfc(df_pivot, cols_dates, nome_empresa, scale_option)
     render_ai_panel(
         contexto=ctx_dfc,
         prompt_fn=lambda c: _prompt_dfc(c, nome_empresa),
-        titulo="🤖 Análise da IA — DFC",
+        titulo="Análise da IA — DFC",
         panel_key=f"dfc_{selected_cnpj}",
     )
 

@@ -1,38 +1,46 @@
 import plotly.graph_objects as go
 import plotly.io as pio
 
+# Brand palette — light theme
 PALETA = [
-    "#A855F7",  # roxo
-    "#38BDF8",  # azul céu
-    "#34D399",  # verde esmeralda
-    "#FB923C",  # laranja
-    "#F472B6",  # rosa
-    "#FACC15",  # âmbar
-    "#60A5FA",  # azul claro
-    "#F87171",  # vermelho suave
+    "#1B98E0",  # Carolina Blue   — série principal
+    "#006494",  # Sapphire Blue   — série secundária
+    "#247BA0",  # Celadon Blue    — série terciária
+    "#13293D",  # Prussian Blue   — acento escuro
+    "#2DC4B2",  # Teal            — contraste complementar
+    "#F4845F",  # Coral           — acento quente
+    "#5C9EAD",  # Steel Blue      — neutro azulado
+    "#E76F51",  # Burnt Sienna    — negativo / alerta
 ]
 
 CORES = {
-    "roxo":       "#A855F7",
-    "roxo_claro": "#C084FC",
-    "azul":       "#38BDF8",
-    "verde":      "#34D399",
-    "laranja":    "#FB923C",
-    "rosa":       "#F472B6",
-    "dourado":    "#FACC15",
-    "vermelho":   "#F87171",
-    "cinza":      "#94A3B8",
-    "branco":     "#F1F5F9",
+    "azul":        "#1B98E0",
+    "azul_escuro": "#006494",
+    "azul_medio":  "#247BA0",
+    "prussian":    "#13293D",
+    "teal":        "#2DC4B2",
+    "coral":       "#F4845F",
+    "steel":       "#5C9EAD",
+    "laranja":     "#E76F51",
+    "verde":       "#2DC4B2",
+    "vermelho":    "#E76F51",
+    "roxo":        "#006494",
+    "dourado":     "#F4845F",
+    "cinza":       "#6B8C9E",
+    "branco":      "#E8F1F2",
 }
 
-BG_TRANSPARENT   = "rgba(0,0,0,0)"
-GRID_COLOR       = "rgba(255,255,255,0.06)"
-ZERO_LINE_COLOR  = "rgba(255,255,255,0.20)"
-AXIS_LINE_COLOR  = "rgba(255,255,255,0.12)"
-FONT_COLOR       = "#CBD5E1"
-FONT_COLOR_TITLE = "#F1F5F9"
-FONT_FAMILY      = "Inter, system-ui, sans-serif"
-LEGEND_BG        = "rgba(15,15,30,0.55)"
+BG_TRANSPARENT  = "rgba(0,0,0,0)"
+GRID_COLOR      = "rgba(19,41,61,0.07)"
+ZERO_LINE_COLOR = "rgba(0,100,148,0.22)"
+AXIS_LINE_COLOR = "rgba(19,41,61,0.14)"
+FONT_COLOR      = "#13293D"
+FONT_COLOR_TITLE = "#006494"
+FONT_FAMILY     = "Inter, system-ui, sans-serif"
+LEGEND_BG       = "rgba(232,241,242,0.92)"
+
+HOVER_BG   = "rgba(19,41,61,0.92)"
+HOVER_FONT = "#E8F1F2"
 
 
 def _base_layout(height: int = 380, title: str = None) -> dict:
@@ -49,15 +57,15 @@ def _base_layout(height: int = 380, title: str = None) -> dict:
             xanchor="right",
             x=1,
             bgcolor=LEGEND_BG,
-            bordercolor="rgba(255,255,255,0.10)",
+            bordercolor=AXIS_LINE_COLOR,
             borderwidth=1,
             font=dict(color=FONT_COLOR, size=11),
         ),
         hovermode="x unified",
         hoverlabel=dict(
-            bgcolor="rgba(15,15,30,0.85)",
-            bordercolor="rgba(255,255,255,0.15)",
-            font=dict(color="#F1F5F9", family=FONT_FAMILY, size=12),
+            bgcolor=HOVER_BG,
+            bordercolor=AXIS_LINE_COLOR,
+            font=dict(color=HOVER_FONT, family=FONT_FAMILY, size=12),
         ),
     )
     if title:
@@ -114,7 +122,6 @@ def apply_theme(
     fig.update_xaxes(**_axis_style(is_category=x_is_category))
 
     y_kw = _axis_style(title_text=y_title, tick_suffix=y_suffix, tick_format=y_format)
-    # secondary_y só pode ser passado em figuras criadas com make_subplots
     if y2_title:
         fig.update_yaxes(**y_kw, secondary_y=False)
         fig.update_yaxes(**_axis_style(title_text=y2_title, show_grid=False), secondary_y=True)
@@ -148,7 +155,7 @@ def line_trace(x, y, name: str, color: str, width: float = 2.5,
         x=x, y=y, name=name,
         mode="lines+markers" + ("+text" if show_text and text is not None else ""),
         line=line_style,
-        marker=dict(size=7, color=color, line=dict(width=1.5, color="rgba(255,255,255,0.3)")),
+        marker=dict(size=7, color=color, line=dict(width=1.5, color="rgba(255,255,255,0.5)")),
         hovertemplate=f"<b>{name}</b>: %{{y}}<extra></extra>",
         **kwargs,
     )
@@ -177,7 +184,7 @@ def area_trace(x, y, name: str, color: str, fill_opacity: float = 0.15,
 
 
 def scatter_polar_trace(r, theta, name: str, color: str,
-                        fill_opacity: float = 0.12) -> go.Scatterpolar:
+                        fill_opacity: float = 0.15) -> go.Scatterpolar:
     rv = int(color[1:3], 16)
     gv = int(color[3:5], 16)
     bv = int(color[5:7], 16)
@@ -222,7 +229,7 @@ def apply_polar_theme(fig: go.Figure, height: int = 420) -> go.Figure:
             yanchor="bottom", y=-0.22,
             xanchor="center", x=0.5,
             bgcolor=LEGEND_BG,
-            bordercolor="rgba(255,255,255,0.10)",
+            bordercolor=AXIS_LINE_COLOR,
             borderwidth=1,
             font=dict(color=FONT_COLOR, size=11),
         ),

@@ -4,11 +4,12 @@ import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from database import get_companies_indicadores, get_companies_with_sector, get_indicadores_data
+from database import get_companies_with_sector, get_indicadores_data
 from chart_theme import (
     apply_theme, apply_polar_theme,
     bar_trace, line_trace,
-    PALETA, CORES, FONT_COLOR, FONT_COLOR_TITLE, BG_TRANSPARENT, GRID_COLOR, ZERO_LINE_COLOR,
+    PALETA, CORES, FONT_COLOR, FONT_COLOR_TITLE, BG_TRANSPARENT,
+    GRID_COLOR, ZERO_LINE_COLOR, FONT_FAMILY, LEGEND_BG,
 )
 from ai_analyst import (
     render_ai_panel,
@@ -96,7 +97,7 @@ def card_metric(label, value_str, delta_str=None, delta_color="normal", help_tex
               delta_color=delta_color, help=help_text)
 
 def render_cards_rentabilidade(df):
-    st.subheader("📈 Rentabilidade")
+    st.subheader("Rentabilidade")
     ml_atual  = safe_get(df, "MARGEM_LIQUIDA");  ml_prev  = safe_get_prev(df, "MARGEM_LIQUIDA")
     roe_atual = safe_get(df, "ROE");              roe_prev = safe_get_prev(df, "ROE")
     mb_atual  = safe_get(df, "MARGEM_BRUTA");     mb_prev  = safe_get_prev(df, "MARGEM_BRUTA")
@@ -117,7 +118,7 @@ def render_cards_rentabilidade(df):
                          help_text=tooltip("MARGEM_EBIT"))
 
 def render_cards_liquidez(df):
-    st.subheader("💧 Liquidez & Solvência")
+    st.subheader("Liquidez & Solvência")
     lc = safe_get(df, "LIQUIDEZ_CORRENTE"); lc_p = safe_get_prev(df, "LIQUIDEZ_CORRENTE")
     ls = safe_get(df, "LIQUIDEZ_SECA");     ls_p = safe_get_prev(df, "LIQUIDEZ_SECA")
     li = safe_get(df, "LIQUIDEZ_IMEDIATA"); li_p = safe_get_prev(df, "LIQUIDEZ_IMEDIATA")
@@ -140,7 +141,7 @@ def render_cards_liquidez(df):
                     help_text=tooltip("ENDIVIDAMENTO_GERAL"))
 
 def render_cards_ciclos(df):
-    st.subheader("🔄 Ciclos Operacionais")
+    st.subheader("Ciclos Operacionais")
     pmrv = safe_get(df, "PMRV"); pmrv_p = safe_get_prev(df, "PMRV")
     pme  = safe_get(df, "PME")
     co   = safe_get(df, "CICLO_OPERACIONAL")
@@ -161,7 +162,7 @@ def render_cards_ciclos(df):
     with c5: card_metric("Ciclo Financeiro", fmt_dias(cf),   help_text=tooltip("CICLO_FINANCEIRO"))
 
 def render_grafico_resultado(df):
-    st.subheader("📊 Receita Líquida vs Lucro Líquido")
+    st.subheader("Receita Líquida vs Lucro Líquido")
 
     df_p = df[["DT_REFER","V16","V23"]].dropna(subset=["V16"]).sort_values("DT_REFER").copy()
     df_p["DT"] = df_p["DT_REFER"].astype(str)
@@ -206,7 +207,7 @@ def render_grafico_resultado(df):
     st.plotly_chart(fig, use_container_width=True)
 
 def render_grafico_margens(df):
-    st.subheader("📉 Evolução das Margens")
+    st.subheader("Evolução das Margens")
 
     config = {
         "MARGEM_BRUTA":   ("Margem Bruta",   CORES["verde"]),
@@ -238,7 +239,7 @@ def render_grafico_margens(df):
     st.plotly_chart(fig, use_container_width=True)
 
 def render_grafico_composicao_ativo(df):
-    st.subheader("🏗️ Composição do Ativo Total")
+    st.subheader("Composição do Ativo Total")
 
     cols = list(CORES_ATIVO.keys())
     df_p = df[["DT_REFER"] + cols].sort_values("DT_REFER").copy()
@@ -261,7 +262,7 @@ def render_grafico_composicao_ativo(df):
     st.plotly_chart(fig, use_container_width=True)
 
 def render_grafico_intangivel(df):
-    st.subheader("💡 Intangível sobre Ativo Total")
+    st.subheader("Intangível sobre Ativo Total")
 
     df_p = df[["DT_REFER","V00","V08"]].dropna(subset=["V00","V08"]).sort_values("DT_REFER").copy()
     df_p["DT"]         = df_p["DT_REFER"].astype(str)
@@ -302,7 +303,7 @@ def render_grafico_intangivel(df):
     st.plotly_chart(fig, use_container_width=True)
 
 def render_grafico_ncg(df):
-    st.subheader("⚙️ Necessidade de Capital de Giro (NCG)")
+    st.subheader("Necessidade de Capital de Giro (NCG)")
 
     config_ncg = {
         "NCG": ("NCG",               CORES["roxo"],   "bar"),
@@ -384,23 +385,68 @@ def render_tabela_indicadores(df):
                 )
         st.dataframe(df_v, hide_index=True, use_container_width=True)
 
+def render_gauges_rentabilidade(df):
+    """Velocímetros para os principais indicadores do último período."""
+    st.subheader("Painel de Indicadores — Último Período")
+
+    def gauge(titulo, valor, fmt, min_v, max_v, zonas, ajuda=None):
+        if valor is None or (isinstance(valor, float) and np.isnan(valor)):
+            return go.Figure()
+        fig = go.Figure(go.Indicator(
+            mode="gauge+number+delta",
+            value=valor * 100 if fmt == "pct" else valor,
+            number=dict(
+                suffix="%" if fmt == "pct" else "x",
+                font=dict(color=FONT_COLOR_TITLE, size=26, family=FONT_FAMILY),
+            ),
+            title=dict(text=titulo, font=dict(color=FONT_COLOR, size=13, family=FONT_FAMILY)),
+            gauge=dict(
+                axis=dict(range=[min_v, max_v], tickfont=dict(color=FONT_COLOR, size=9)),
+                bar=dict(color=PALETA[0], thickness=0.3),
+                bgcolor="rgba(232,241,242,0.5)",
+                borderwidth=1, bordercolor="rgba(19,41,61,0.10)",
+                steps=[dict(range=[r[0], r[1]], color=r[2]) for r in zonas],
+                threshold=dict(line=dict(color=PALETA[3], width=2),
+                               thickness=0.75, value=valor * 100 if fmt == "pct" else valor),
+            ),
+        ))
+        fig.update_layout(
+            paper_bgcolor=BG_TRANSPARENT,
+            font=dict(family=FONT_FAMILY, color=FONT_COLOR),
+            height=220, margin=dict(t=40, b=10, l=20, r=20),
+        )
+        return fig
+
+    zonas_ml  = [(-50, 0, "#F4A8A8"), (0, 10, "#FEFCC8"), (10, 100, "#B8DFB3")]
+    zonas_roe = [(-50, 0, "#F4A8A8"), (0, 10, "#FEFCC8"), (10, 100, "#B8DFB3")]
+    zonas_lc  = [(0, 1, "#F4A8A8"), (1, 1.5, "#FEFCC8"), (1.5, 5, "#B8DFB3")]
+    zonas_eg  = [(0, 40, "#B8DFB3"), (40, 70, "#FEFCC8"), (70, 100, "#F4A8A8")]
+
+    ml  = safe_get(df, "MARGEM_LIQUIDA")
+    roe = safe_get(df, "ROE")
+    lc  = safe_get(df, "LIQUIDEZ_CORRENTE")
+    eg  = safe_get(df, "ENDIVIDAMENTO_GERAL")
+
+    c1, c2, c3, c4 = st.columns(4)
+    with c1: st.plotly_chart(gauge("Margem Líquida", ml, "pct", -50, 100, zonas_ml,
+                                   tooltip("MARGEM_LIQUIDA")), use_container_width=True)
+    with c2: st.plotly_chart(gauge("ROE", roe, "pct", -50, 100, zonas_roe,
+                                   tooltip("ROE")), use_container_width=True)
+    with c3: st.plotly_chart(gauge("Liquidez Corrente", lc, "num", 0, 5, zonas_lc,
+                                   tooltip("LIQUIDEZ_CORRENTE")), use_container_width=True)
+    with c4: st.plotly_chart(gauge("Endividamento Geral", eg, "pct", 0, 100, zonas_eg,
+                                   tooltip("ENDIVIDAMENTO_GERAL")), use_container_width=True)
+
+
 def render_indicadores_page():
 
+    selected_cnpj = st.session_state.get("global_cnpj")
+    selected_label = st.session_state.get("global_label", "")
+    if not selected_cnpj:
+        st.warning("Selecione uma empresa na barra lateral.")
+        return
+
     with st.sidebar:
-        st.header("Filtros — Indicadores")
-
-        df_empresas = get_companies_indicadores()
-        if df_empresas.empty:
-            st.warning("Base de indicadores indisponível.")
-            return
-
-        mapa = dict(zip(df_empresas["LABEL"], df_empresas["CNPJ_CIA"]))
-        selected_label = st.selectbox("Empresa:", options=df_empresas["LABEL"].tolist(),
-                                      key="sel_empresa_indicadores")
-        selected_cnpj = mapa[selected_label]
-
-        st.markdown("---")
-
         df_all = get_indicadores_data(selected_cnpj)
         if df_all.empty:
             st.error("Sem dados para esta empresa.")
@@ -430,11 +476,14 @@ def render_indicadores_page():
              if "RAZAO_SOCIAL" in df.columns and not df["RAZAO_SOCIAL"].dropna().empty
              else nome_empresa)
 
-    st.title(f"📊 {razao}")
+    st.title(f"{razao}")
     st.caption(
         f"**CNPJ:** {selected_cnpj} | **Indicadores Financeiros** | "
         f"Períodos: {', '.join(sorted(selected_dates))}"
     )
+    st.markdown("---")
+
+    render_gauges_rentabilidade(df)
     st.markdown("---")
 
     render_cards_rentabilidade(df)
@@ -462,7 +511,7 @@ def render_indicadores_page():
     render_ai_panel(
         contexto=contexto_ia,
         prompt_fn=lambda ctx: _prompt_indicadores(ctx, razao),
-        titulo="🤖 Análise da IA — Indicadores Financeiros",
+        titulo="Análise da IA — Indicadores Financeiros",
         panel_key=f"ind_{selected_cnpj}",
     )
 

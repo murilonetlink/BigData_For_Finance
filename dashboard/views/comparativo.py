@@ -185,15 +185,15 @@ def _render_heatmap_setores(df_all_bench, emp_row, nome_empresa, setor_empresa):
     labels_hm = [TODOS_INDICADORES[c][0] for c in cols_hm]
     tipos_hm  = [TODOS_INDICADORES[c][1] for c in cols_hm]
 
-    df_hm = df_all_bench[["SETOR"] + cols_hm].dropna(subset=["SETOR"]).copy()
+    df_setores = df_all_bench[["SETOR"] + cols_hm].dropna(subset=["SETOR"]).copy()
 
     emp_row_dict = {"SETOR": f"★ {nome_empresa}"}
     for c in cols_hm:
         v = emp_row.get(c, None)
         emp_row_dict[c] = float(v) if v is not None and not pd.isna(v) else None
-    # Empresa no topo: concatenar após e depois inverter a ordem do df
-    df_hm = pd.concat([df_hm, pd.DataFrame([emp_row_dict])], ignore_index=True)
-    df_hm = df_hm.iloc[::-1].reset_index(drop=True)
+
+    # Empresa primeiro (índice 0) — com autorange=reversed no tema, índice 0 fica no topo
+    df_hm = pd.concat([pd.DataFrame([emp_row_dict]), df_setores], ignore_index=True)
 
     # Z-Score por coluna
     z_cols = []
@@ -208,8 +208,6 @@ def _render_heatmap_setores(df_all_bench, emp_row, nome_empresa, setor_empresa):
     for _, row_hm in df_hm.iterrows():
         text_m.append([fmt_val(row_hm.get(c), t) for c, t in zip(cols_hm, tipos_hm)])
 
-    # Cor do texto: preto (prussian) funciona melhor que branco no amarelo central
-    # e mantém legibilidade aceitável nos extremos da paleta RdYlGn
     fig = go.Figure(go.Heatmap(
         z=z_t, x=labels_hm, y=df_hm["SETOR"].tolist(),
         text=text_m, texttemplate="%{text}",
@@ -222,10 +220,9 @@ def _render_heatmap_setores(df_all_bench, emp_row, nome_empresa, setor_empresa):
         hovertemplate="<b>%{y}</b><br>%{x}: %{text}<extra></extra>",
     ))
 
-    # Destaque linha da empresa (última linha = topo visual após inversão)
-    n = len(df_hm) - 1
+    # Destaque linha da empresa — índice 0 = topo (autorange=reversed no tema)
     fig.add_shape(
-        type="rect", x0=-0.5, x1=len(labels_hm)-0.5, y0=n-0.5, y1=n+0.5,
+        type="rect", x0=-0.5, x1=len(labels_hm)-0.5, y0=-0.5, y1=0.5,
         line=dict(color=PALETA[0], width=2.5),
         xref="x", yref="y",
     )

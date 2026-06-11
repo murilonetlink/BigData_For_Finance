@@ -606,7 +606,9 @@ def render_ai_panel(
         # ── Exibe análise inicial ────────────────────────────────────────────
         if st.session_state[anl_key]:
             st.markdown("---")
-            st.markdown(st.session_state[anl_key])
+            # Escapa $ para evitar que o Streamlit interprete como LaTeX (\$xxx\$ fica verde)
+            texto_seguro = st.session_state[anl_key].replace("$", "\\$")
+            st.markdown(texto_seguro)
             st.caption(
                 "⚠️ Esta análise é gerada por IA e tem fins exclusivamente didáticos. "
                 "Não constitui recomendação de investimento."
@@ -643,7 +645,9 @@ def render_ai_panel(
                     if err_chat:
                         st.warning(f"⚠️ {err_chat}")
                     else:
-                        st.markdown(resposta)
+                        # Escapa $ para evitar que o Streamlit interprete como LaTeX
+                        resposta_segura = resposta.replace("$", "\\$")
+                        st.markdown(resposta_segura)
                         st.session_state[hist_key].append(
                             {"role": "assistant", "content": resposta}
                         )

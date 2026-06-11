@@ -252,6 +252,8 @@ def apply_heatmap_theme(fig: go.Figure, height: int = 500) -> go.Figure:
         yaxis=dict(
             tickfont=dict(color=FONT_COLOR, size=10),
             linecolor=AXIS_LINE_COLOR,
+            autorange="reversed",   # empresa (★) fica na primeira linha do topo
         ),
     )
     return fig
+

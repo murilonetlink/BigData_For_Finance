@@ -43,13 +43,14 @@ def render_sobre_page():
     st.caption("Disciplina: Big Data for Finance · FAE Centro Universitário")
     st.markdown("---")
 
-    tab_visao, tab_arq, tab_telas, tab_indicadores, tab_ia, tab_tecnico = st.tabs([
+    tab_visao, tab_arq, tab_telas, tab_indicadores, tab_ia, tab_tecnico, tab_fluxo = st.tabs([
         "Visão Geral",
         "Arquitetura",
         "Funcionalidades",
         "Indicadores",
         "IA Analyst",
         "Decisões Técnicas",
+        "Fluxogramas",
     ])
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -798,7 +799,7 @@ A faixa mostra onde estão os 50% centrais das empresas do setor, dando contexto
 para avaliar se a empresa está na cauda ou no núcleo da distribuição.
             """)
 
-        with st.expander("Heatmap Dividido em Abas por Grupo"):
+        with st.expander("6Heatmap Dividido em Abas por Grupo"):
             st.markdown("""
 O heatmap original com 14 colunas era ilegível no celular. A solução foi dividir
 a função `_render_heatmap_setores()` em duas:
@@ -809,3 +810,161 @@ a função `_render_heatmap_setores()` em duas:
 A aba "Todos" ao final renderiza o heatmap completo (útil no desktop ou na horizontal).
 Isso reduz de 14 para 3–5 colunas por aba, tornando legível mesmo em portrait.
             """)
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # FLUXOGRAMAS
+    # ─────────────────────────────────────────────────────────────────────────
+    with tab_fluxo:
+        st.subheader("Fluxogramas da Aplicação")
+        st.caption("Visualize a arquitetura, o pipeline de dados e o fluxo de uma análise completa.")
+
+        # helpers reutilizáveis para os diagramas HTML
+        def _box(label, bg, border, radius="8px", extra=""):
+            return (
+                f'<div style="background:{bg};border:1.5px solid {border};border-radius:{radius};'
+                f'padding:0.45rem 0.9rem;font-size:0.85rem;font-weight:600;'
+                f'box-shadow:0 1px 4px rgba(0,0,0,0.07);white-space:nowrap;{extra}">{label}</div>'
+            )
+
+        def _pill(label, bg, border):
+            return _box(label, bg, border, radius="50px", extra="padding:0.55rem 1.6rem;font-size:0.92rem;")
+
+        def _arrow(down=True):
+            sym = "↓" if down else "→"
+            return (
+                f'<div style="text-align:center;color:#90CAF9;font-size:1.5rem;'
+                f'line-height:1;margin:0.3rem 0;">{sym}</div>'
+            )
+
+        def _cluster(title, color_border, color_bg, children_html, emoji=""):
+            return (
+                f'<div style="border:2px dashed {color_border};border-radius:14px;'
+                f'padding:0.8rem 1rem;background:{color_bg};margin-bottom:0.1rem;">'
+                f'<div style="font-size:0.73rem;font-weight:700;letter-spacing:0.05em;'
+                f'text-transform:uppercase;margin-bottom:0.55rem;color:{color_border};">'
+                f'{emoji} {title}</div>'
+                f'<div style="display:flex;gap:0.55rem;justify-content:center;flex-wrap:wrap;">'
+                f'{children_html}</div></div>'
+            )
+
+        _WRAP_OPEN = (
+            '<div style="overflow-x:auto;padding:0.5rem 0;">'
+            '<div style="min-width:320px;max-width:680px;margin:0 auto;'
+            'font-family:Inter,system-ui,sans-serif;color:#13293D;">'
+        )
+        _WRAP_CLOSE = '</div></div>'
+
+        f1, f2, f3 = st.tabs(["Pipeline de Dados", "Módulos do Dashboard", "Fluxo de Análise IA"])
+
+        # ── Diagrama 1: Pipeline Medallion ───────────────────────────────────
+        with f1:
+            st.markdown("##### Pipeline completo: da CVM ao usuário final")
+            bronze_boxes = (
+                _box("DFP (anuais)",     "#FFF8E1", "#FFB300") +
+                _box("ITR (trimestrais)","#FFF8E1", "#FFB300") +
+                _box("CAD / FRE",        "#FFF8E1", "#FFB300")
+            )
+            silver_boxes = (
+                _box("Empresas", "#E3F2FD", "#90CAF9") +
+                _box("BP",       "#E3F2FD", "#90CAF9") +
+                _box("DRE",      "#E3F2FD", "#90CAF9") +
+                _box("DFC",      "#E3F2FD", "#90CAF9")
+            )
+            gold_boxes = _box("mart_indicadores_financeiros", "#F3E5F5", "#CE93D8")
+            dash_boxes = (
+                _box("Balanço",     "#E8F5E9", "#81C784") +
+                _box("DRE",         "#E8F5E9", "#81C784") +
+                _box("DFC",         "#E8F5E9", "#81C784") +
+                _box("Indicadores", "#E8F5E9", "#81C784") +
+                _box("Comparativo", "#E8F5E9", "#81C784")
+            )
+            html = (
+                _WRAP_OPEN
+                + '<div style="display:flex;justify-content:center;margin-bottom:0.4rem;">'
+                + _pill("🌐  CVM — Dados Abertos", "#DBEAFE", "#90CAF9")
+                + '</div>'
+                + _arrow()
+                + _cluster("Camada Bronze — Ingestão",    "#FFB300", "rgba(255,193,7,0.07)",  bronze_boxes, "🥉")
+                + _arrow()
+                + _cluster("Camada Silver — Normalização","#90CAF9", "rgba(144,202,249,0.07)", silver_boxes, "🥈")
+                + _arrow()
+                + _cluster("Camada Gold — Indicadores",   "#CE93D8", "rgba(206,147,216,0.07)", gold_boxes,   "🥇")
+                + _arrow()
+                + _cluster("Dashboard Streamlit",         "#81C784", "rgba(129,199,132,0.07)", dash_boxes,   "📊")
+                + _arrow()
+                + '<div style="display:flex;justify-content:center;">'
+                + _pill("👤  Usuário", "#E3F2FD", "#90CAF9")
+                + '</div>'
+                + _WRAP_CLOSE
+            )
+            st.markdown(html, unsafe_allow_html=True)
+
+        # ── Diagrama 2: Módulos do Dashboard ─────────────────────────────────
+        with f2:
+            st.markdown("##### Dependências entre os módulos Python")
+            app_box = '<div style="display:flex;justify-content:center;">' + _pill("app.py", "#DBEAFE", "#90CAF9") + '</div>'
+            views_boxes = (
+                _box("balanco_patrimonial.py",    "#E8F5E9", "#81C784") +
+                _box("dre.py",                    "#E8F5E9", "#81C784") +
+                _box("dfc.py",                    "#E8F5E9", "#81C784") +
+                _box("indicadores_financeiros.py","#E8F5E9", "#81C784") +
+                _box("comparativo.py",            "#E8F5E9", "#81C784") +
+                _box("sobre.py",                  "#E8F5E9", "#81C784")
+            )
+            infra_boxes = (
+                _box("database.py",    "#F3E5F5", "#CE93D8") +
+                _box("chart_theme.py", "#F3E5F5", "#CE93D8") +
+                _box("ai_analyst.py",  "#F3E5F5", "#CE93D8") +
+                _box("glossary.py",    "#F3E5F5", "#CE93D8") +
+                _box("config.py",      "#F3E5F5", "#CE93D8")
+            )
+            html2 = (
+                _WRAP_OPEN
+                + app_box
+                + _arrow()
+                + _cluster("Views — Telas do Dashboard", "#81C784", "rgba(129,199,132,0.07)", views_boxes)
+                + _arrow()
+                + _cluster("Infraestrutura Compartilhada", "#CE93D8", "rgba(206,147,216,0.07)", infra_boxes)
+                + _arrow()
+                + '<div style="display:flex;justify-content:center;">'
+                + _pill("PostgreSQL (3 camadas)", "#E3F2FD", "#90CAF9")
+                + '</div>'
+                + _WRAP_CLOSE
+            )
+            st.markdown(html2, unsafe_allow_html=True)
+
+        # ── Diagrama 3: Fluxo de Análise IA ──────────────────────────────────
+        with f3:
+            st.markdown("##### Do clique do usuário à análise gerada pela IA")
+
+            def _step(num, label, bg, border, sublabel=""):
+                sub = f'<div style="font-size:0.75rem;font-weight:400;margin-top:0.2rem;opacity:0.75;">{sublabel}</div>' if sublabel else ""
+                return (
+                    f'<div style="display:flex;align-items:center;gap:0.75rem;margin:0 auto;max-width:440px;">'
+                    f'<div style="background:{border};color:#fff;border-radius:50%;width:1.6rem;height:1.6rem;'
+                    f'display:flex;align-items:center;justify-content:center;font-size:0.78rem;'
+                    f'font-weight:700;flex-shrink:0;">{num}</div>'
+                    f'<div style="flex:1;background:{bg};border:1.5px solid {border};border-radius:10px;'
+                    f'padding:0.55rem 1rem;font-size:0.88rem;font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,0.07);">'
+                    f'{label}{sub}</div></div>'
+                )
+
+            steps = (
+                _step("①", "Usuário seleciona empresa e período", "#DBEAFE", "#90CAF9")
+                + _arrow()
+                + _step("②", "database.py — query ao PostgreSQL", "#F3E5F5", "#CE93D8", "Gold Layer: mart_indicadores_financeiros")
+                + _arrow()
+                + _step("③", "build_context_*() — monta contexto", "#E3F2FD", "#90CAF9", "Converte DataFrame em texto estruturado")
+                + _arrow()
+                + _step("④", "_prompt_*() — monta user prompt", "#E3F2FD", "#90CAF9", "Contexto + perguntas específicas da tela")
+                + _arrow()
+                + _step("⑤", "Groq API — LLaMA 3.3 70B", "#FFF8E1", "#FFB300", "temp=0.3 · max_tokens=1200 · ~1–3 segundos")
+                + _arrow()
+                + _step("⑥", "Resposta em português", "#E8F5E9", "#81C784", "Análise estruturada com bullet points")
+                + _arrow()
+                + _step("⑦", "session_state — persiste a análise", "#EDE7F6", "#9FA8DA", "Não some ao navegar entre abas ou filtros")
+                + _arrow()
+                + _step("⑧", "render_ai_panel() — exibe no expander", "#E8F5E9", "#81C784", "Reutilizado em todas as 7 telas")
+            )
+            st.markdown(_WRAP_OPEN + steps + _WRAP_CLOSE, unsafe_allow_html=True)
+

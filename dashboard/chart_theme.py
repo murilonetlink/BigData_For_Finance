@@ -1,5 +1,18 @@
+import streamlit as st
 import plotly.graph_objects as go
 import plotly.io as pio
+
+# Configuração padrão para todos os gráficos Plotly:
+# - dragmode pan: arrastar move o gráfico em vez de dar zoom
+# - scrollZoom off: scroll do mouse/touch não dá zoom
+# - doubleClick reset: duplo clique volta à visão original
+PLOTLY_CONFIG = {
+    "scrollZoom": False,
+    "doubleClick": "reset",
+    "displayModeBar": "hover",
+    "modeBarButtonsToRemove": ["lasso2d", "select2d"],
+    "toImageButtonOptions": {"format": "png", "scale": 2},
+}
 
 # Brand palette — pastel blue-family light theme
 PALETA = [
@@ -67,6 +80,7 @@ def _base_layout(height: int = 380, title: str = None) -> dict:
             bordercolor=AXIS_LINE_COLOR,
             font=dict(color=HOVER_FONT, family=FONT_FAMILY, size=12),
         ),
+        dragmode="pan",
     )
     if title:
         layout["title"] = dict(
@@ -256,4 +270,9 @@ def apply_heatmap_theme(fig: go.Figure, height: int = 500) -> go.Figure:
         ),
     )
     return fig
+
+
+def plot_chart(fig: go.Figure, **kwargs) -> None:
+    """Wrapper centralizado para st.plotly_chart com config padrão (pan, sem zoom acidental)."""
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG, **kwargs)
 

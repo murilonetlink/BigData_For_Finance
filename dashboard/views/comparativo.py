@@ -17,6 +17,7 @@ from chart_theme import (
     bar_trace, line_trace, scatter_polar_trace,
     PALETA, CORES, FONT_COLOR, FONT_COLOR_TITLE,
     BG_TRANSPARENT, GRID_COLOR, ZERO_LINE_COLOR,
+    plot_chart,
 )
 from ai_analyst import (
     render_ai_panel,
@@ -111,7 +112,7 @@ def _render_radar(dfs: dict, cols: list):
         ))
 
     apply_polar_theme(fig, height=420)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
     st.caption("⚠️ Valores normalizados pelo máximo do grupo comparado — não representa percentil.")
 
 def _render_scorecard(emp_row, bench_row):
@@ -178,7 +179,7 @@ def _render_evolucao_vs_setor(cnpj, nome_empresa, setor):
                   line_color="rgba(255,255,255,0.2)", line_width=1)
     apply_theme(fig, height=360, y_title="Margem Líquida (%)", y_suffix="%",
                 x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 def _render_heatmap_grupo(df_hm, cols, labels, tipos, nome_empresa, tab_key):
     """Renderiza um heatmap para um subconjunto de colunas (um grupo de indicadores)."""
@@ -219,7 +220,7 @@ def _render_heatmap_grupo(df_hm, cols, labels, tipos, nome_empresa, tab_key):
     apply_heatmap_theme(fig, height=altura)
     # margem esquerda menor quando há poucas colunas (leitura mobile)
     fig.update_layout(margin=dict(t=20, b=60, l=160, r=40))
-    st.plotly_chart(fig, use_container_width=True, key=f"hm_{tab_key}")
+    plot_chart(fig, key=f"hm_{tab_key}")
 
 
 def _render_heatmap_setores(df_all_bench, emp_row, nome_empresa, setor_empresa):
@@ -295,7 +296,7 @@ def render_empresa_vs_empresa(empresas_selecionadas: dict, data_ref: str):
 
         fig.update_layout(barmode="group")
         apply_theme(fig, height=320, x_is_category=True)
-        st.plotly_chart(fig, use_container_width=True)
+        plot_chart(fig)
 
     # Evolução temporal — Margem Líquida
     st.markdown("#### Evolução Temporal — Margem Líquida")
@@ -318,7 +319,7 @@ def render_empresa_vs_empresa(empresas_selecionadas: dict, data_ref: str):
                      line_color="rgba(255,255,255,0.2)", line_width=1)
     apply_theme(fig_ev, height=360, y_title="Margem Líquida (%)", y_suffix="%",
                 x_is_category=True)
-    st.plotly_chart(fig_ev, use_container_width=True)
+    plot_chart(fig_ev)
 
     with st.expander("📋 Tabela Comparativa"):
         rows = [{"Indicador": TODOS_INDICADORES[c][0],
@@ -417,7 +418,7 @@ def render_empresa_vs_setor(cnpj: str, nome_empresa: str, setor: str, data_ref: 
 
         fig.update_layout(barmode="group")
         apply_theme(fig, height=320, x_is_category=True)
-        st.plotly_chart(fig, use_container_width=True)
+        plot_chart(fig)
 
     st.markdown("#### Posicionamento vs Mediana")
     _render_scorecard(emp_row, bench_row)
@@ -502,7 +503,7 @@ def render_empresa_vs_todos_setores(cnpj: str, nome_empresa: str, data_ref: str)
     apply_theme(fig_r, height=420, y_title=ind_label, x_is_category=True)
     fig_r.update_layout(margin=dict(b=130))
     fig_r.update_xaxes(tickangle=-35)
-    st.plotly_chart(fig_r, use_container_width=True)
+    plot_chart(fig_r)
 
     with st.expander("📋 Tabela Completa por Setor"):
         colunas_exib = ["SETOR"] + [c for c in TODOS_INDICADORES if c in df_all.columns]

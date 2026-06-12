@@ -1,7 +1,44 @@
 import streamlit as st
 
+# CSS injetado apenas quando a tela Sobre está ativa.
+# Como o Streamlit re-injeta todo CSS a cada navegação, esse bloco só
+# está presente no DOM quando sobre.py é renderizado — sem persistência
+# indesejada nas outras telas.
+_SOBRE_CSS = """
+<style>
+@media (max-width: 768px) {
+    /* Força colunas a empilharem (100% de largura) — substitui a
+       regra de 50% do app.py que é ideal para métricas, mas estreita
+       demais para textos longos como os da tela Sobre.             */
+    [data-testid="stHorizontalBlock"] {
+        flex-direction: column !important;
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+        min-width: 100% !important;
+        max-width: 100% !important;
+        width:     100% !important;
+        flex:      1 1  100% !important;
+    }
+    /* Tabelas: scroll horizontal para não quebrar layout */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    /* Blocos de código: scroll horizontal + fonte menor */
+    pre {
+        overflow-x: auto !important;
+        white-space: pre !important;
+        font-size: 0.78rem !important;
+    }
+}
+</style>
+"""
+
 
 def render_sobre_page():
+    st.markdown(_SOBRE_CSS, unsafe_allow_html=True)
+
     st.title("CVM Data Lake — Sobre o Projeto")
     st.caption("Disciplina: Big Data for Finance · FAE Centro Universitário")
     st.markdown("---")
@@ -666,7 +703,7 @@ na sessão até o usuário explicitamente gerar uma nova.
     with tab_tecnico:
         st.subheader("Decisões Técnicas Interessantes")
 
-        with st.expander("🎨 Sistema de Tema Centralizado (`chart_theme.py`)"):
+        with st.expander("Sistema de Tema Centralizado (`chart_theme.py`)"):
             st.markdown("""
 Todos os gráficos do dashboard importam de um único arquivo de tema — `chart_theme.py`.
 
@@ -680,7 +717,7 @@ Todos os gráficos do dashboard importam de um único arquivo de tema — `chart
 **Benefício:** mudar qualquer cor ou layout reflete em todos os gráficos de uma vez.
             """)
 
-        with st.expander("⚡ Cache Inteligente por TTL (`database.py`)"):
+        with st.expander("Cache Inteligente por TTL (`database.py`)"):
             st.markdown("""
 Queries ao PostgreSQL são cacheadas com `@st.cache_data(ttl=...)`:
 
@@ -693,7 +730,7 @@ Queries ao PostgreSQL são cacheadas com `@st.cache_data(ttl=...)`:
 Isso garante navegação fluida sem hits desnecessários ao banco.
             """)
 
-        with st.expander("📐 Z-Score com Inversão por Semântica (`comparativo.py`)"):
+        with st.expander("Z-Score com Inversão por Semântica (`comparativo.py`)"):
             st.markdown("""
 No heatmap de setores, o z-score é calculado coluna a coluna. Porém, para indicadores
 onde **um valor menor é melhor** (endividamento, ciclos), o z-score é negado:
@@ -705,13 +742,13 @@ if not TODOS_INDICADORES[col][2]:  # [2] = maior_melhor
 ```
 
 Isso garante que:
-- Uma empresa com **Ciclo Financeiro muito negativo** (ótimo!) aparece em **verde**
+- Uma empresa com **Ciclo Financeiro muito negativo** aparece em **verde**
 - Um **Endividamento Geral alto** (ruim) aparece em **vermelho**
 
 A semântica dos indicadores está codificada diretamente em `TODOS_INDICADORES` como uma tupla `(label, tipo, maior_melhor)`.
             """)
 
-        with st.expander("📖 Glossário com Tooltips em Todos os Indicadores (`glossary.py`)"):
+        with st.expander("Glossário com Tooltips em Todos os Indicadores (`glossary.py`)"):
             st.markdown("""
 O arquivo `glossary.py` centraliza 35+ definições financeiras com fórmula, referência e dica de interpretação.
 
@@ -728,7 +765,7 @@ chart_tooltip("grafico_margens")
 Isso garante que o usuário sempre possa entender o que está vendo sem precisar de documentação externa.
             """)
 
-        with st.expander("📱 Responsividade Mobile (`app.py`)"):
+        with st.expander("Responsividade Mobile (`app.py`)"):
             st.markdown("""
 O CSS injeta um bloco `@media (max-width: 768px)` que redefine:
 
@@ -742,7 +779,7 @@ O CSS injeta um bloco `@media (max-width: 768px)` que redefine:
 O aviso "gire o celular" aparece apenas em telas ≤768px via CSS, sem JS.
             """)
 
-        with st.expander("🏭 Banda Interquartil P25–P75 (Empresa vs Setor)"):
+        with st.expander("Banda Interquartil P25–P75 (Empresa vs Setor)"):
             st.markdown("""
 Além da mediana do setor, o benchmark também inclui os percentis 25 e 75.
 Isso cria uma **faixa visual** atrás de cada barra:
@@ -761,7 +798,7 @@ A faixa mostra onde estão os 50% centrais das empresas do setor, dando contexto
 para avaliar se a empresa está na cauda ou no núcleo da distribuição.
             """)
 
-        with st.expander("🗂️ Heatmap Dividido em Abas por Grupo"):
+        with st.expander("Heatmap Dividido em Abas por Grupo"):
             st.markdown("""
 O heatmap original com 14 colunas era ilegível no celular. A solução foi dividir
 a função `_render_heatmap_setores()` em duas:

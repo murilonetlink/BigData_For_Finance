@@ -110,7 +110,7 @@ def render_explorer_page():
 
                         if fig:
                             fig.update_traces(marker_color=CORES_FAE['roxo'])
-                            st.plotly_chart(fig, use_container_width=True)
+                            plot_chart(fig)
                             
                     except Exception as e:
                         st.error(f"Não foi possível gerar o gráfico: {e}")

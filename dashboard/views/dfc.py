@@ -13,7 +13,7 @@ from database import get_dates_demonstrativo, get_demonstrativo_filtered
 from chart_theme import (
     BG_TRANSPARENT, GRID_COLOR, ZERO_LINE_COLOR,
     FONT_COLOR, FONT_COLOR_TITLE, PALETA, FONT_FAMILY, LEGEND_BG,
-    apply_theme,
+    apply_theme, plot_chart,
 )
 from ai_analyst import (
     render_ai_panel,
@@ -109,7 +109,7 @@ def _render_fluxos(df_pivot, cols_dates, scale_option):
                   line_color="rgba(255,255,255,0.2)", line_width=1)
     fig.update_layout(barmode="group")
     apply_theme(fig, height=400, y_title=f"Valor ({scale_option})", x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 def _render_fcf(df_pivot, cols_dates, scale_option):
     st.subheader("Free Cash Flow (FCO − |FCI|)", help=chart_tooltip("fcf_dfc"))
@@ -148,7 +148,7 @@ def _render_fcf(df_pivot, cols_dates, scale_option):
     fig.add_hline(y=0, line_dash="dot",
                   line_color="rgba(255,255,255,0.2)", line_width=1)
     apply_theme(fig, height=380, y_title=f"Valor ({scale_option})", x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 def _render_cascata_caixa(df_pivot, cols_dates, scale_option):
     st.subheader("Composição da Variação de Caixa (último período)", help=chart_tooltip("cascata_caixa_dfc"))
@@ -195,7 +195,7 @@ def _render_cascata_caixa(df_pivot, cols_dates, scale_option):
     ))
 
     apply_theme(fig, height=380, y_title=f"Valor ({scale_option})", x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
     st.caption(f"📅 Período de referência: **{dt_ref}**")
 
 def _render_caixa_acumulado(df_pivot, cols_dates, scale_option):
@@ -230,7 +230,7 @@ def _render_caixa_acumulado(df_pivot, cols_dates, scale_option):
     fig.add_hline(y=0, line_dash="dot",
                   line_color="rgba(255,255,255,0.2)", line_width=1)
     apply_theme(fig, height=360, y_title=f"Valor ({scale_option})", x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 def _render_bolha_fco_fci(df_pivot, cols_dates, scale_option):
     """Scatter: FCO (x) vs FCI (y), tamanho = variação absoluta total."""
@@ -275,7 +275,7 @@ def _render_bolha_fco_fci(df_pivot, cols_dates, scale_option):
         margin=dict(t=20, b=50, l=60, r=20),
         hoverlabel=dict(bgcolor="rgba(19,41,61,0.92)", font=dict(color="#E8F1F2")),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
     st.caption("🟢 FCO+ / FCI− (saudável) | 🔴 FCO− (alerta) | tamanho = magnitude do FCF")
 
 

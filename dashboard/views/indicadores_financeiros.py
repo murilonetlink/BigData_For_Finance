@@ -10,6 +10,7 @@ from chart_theme import (
     bar_trace, line_trace,
     PALETA, CORES, FONT_COLOR, FONT_COLOR_TITLE, BG_TRANSPARENT,
     GRID_COLOR, ZERO_LINE_COLOR, FONT_FAMILY, LEGEND_BG,
+    plot_chart,
 )
 from ai_analyst import (
     render_ai_panel,
@@ -204,7 +205,7 @@ def render_grafico_resultado(df):
                 y_title="Receita (R$ MM)",
                 y2_title="Lucro (R$ MM)",
                 x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 def render_grafico_margens(df):
     st.subheader("Evolução das Margens", help=chart_tooltip("grafico_margens"))
@@ -236,7 +237,7 @@ def render_grafico_margens(df):
     fig.add_hline(y=0, line_dash="dot",
                   line_color="rgba(255,255,255,0.25)", line_width=1)
     apply_theme(fig, height=380, y_title="(%)", y_suffix="%", x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 def render_grafico_composicao_ativo(df):
     st.subheader("Composição do Ativo Total", help=chart_tooltip("grafico_composicao_ativo"))
@@ -259,7 +260,7 @@ def render_grafico_composicao_ativo(df):
 
     fig.update_layout(barmode="stack")
     apply_theme(fig, height=420, y_title="R$ Milhões", x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 def render_grafico_intangivel(df):
     st.subheader("Intangível sobre Ativo Total", help=chart_tooltip("grafico_intangivel"))
@@ -301,7 +302,7 @@ def render_grafico_intangivel(df):
                 y_title="Intangível (R$ MM)",
                 y2_title="% sobre Ativo Total",
                 x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 def render_grafico_ncg(df):
     st.subheader("Necessidade de Capital de Giro (NCG)", help=chart_tooltip("grafico_ncg"))
@@ -341,7 +342,7 @@ def render_grafico_ncg(df):
                   line_color="rgba(255,255,255,0.25)", line_width=1)
     fig.update_layout(barmode="group")
     apply_theme(fig, height=380, y_title="R$ Milhões", x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 def render_tabela_indicadores(df):
     with st.expander("📋 Tabela Completa de Indicadores", expanded=False):
@@ -429,14 +430,14 @@ def render_gauges_rentabilidade(df):
     eg  = safe_get(df, "ENDIVIDAMENTO_GERAL")
 
     c1, c2, c3, c4 = st.columns(4)
-    with c1: st.plotly_chart(gauge("Margem Líquida", ml, "pct", -50, 100, zonas_ml,
-                                   tooltip("MARGEM_LIQUIDA")), use_container_width=True)
-    with c2: st.plotly_chart(gauge("ROE", roe, "pct", -50, 100, zonas_roe,
-                                   tooltip("ROE")), use_container_width=True)
-    with c3: st.plotly_chart(gauge("Liquidez Corrente", lc, "num", 0, 5, zonas_lc,
-                                   tooltip("LIQUIDEZ_CORRENTE")), use_container_width=True)
-    with c4: st.plotly_chart(gauge("Endividamento Geral", eg, "pct", 0, 100, zonas_eg,
-                                   tooltip("ENDIVIDAMENTO_GERAL")), use_container_width=True)
+    with c1: plot_chart(gauge("Margem Líquida", ml, "pct", -50, 100, zonas_ml,
+                              tooltip("MARGEM_LIQUIDA")))
+    with c2: plot_chart(gauge("ROE", roe, "pct", -50, 100, zonas_roe,
+                              tooltip("ROE")))
+    with c3: plot_chart(gauge("Liquidez Corrente", lc, "num", 0, 5, zonas_lc,
+                              tooltip("LIQUIDEZ_CORRENTE")))
+    with c4: plot_chart(gauge("Endividamento Geral", eg, "pct", 0, 100, zonas_eg,
+                              tooltip("ENDIVIDAMENTO_GERAL")))
 
 
 def render_indicadores_page():

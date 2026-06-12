@@ -12,7 +12,7 @@ from database import get_dates_demonstrativo, get_demonstrativo_filtered
 from chart_theme import (
     BG_TRANSPARENT, GRID_COLOR, ZERO_LINE_COLOR,
     FONT_COLOR, FONT_COLOR_TITLE, PALETA, FONT_FAMILY, LEGEND_BG,
-    apply_theme,
+    apply_theme, plot_chart,
 )
 from ai_analyst import (
     render_ai_panel,
@@ -136,7 +136,7 @@ def _render_waterfall(df_pivot, cols_dates, scale_option):
     ))
 
     apply_theme(fig, height=420, y_title=f"Valor ({scale_option})", x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
     st.caption(f"Período de referência: **{dt_ref}**")
 
 def _render_evolucao_resultado(df_pivot, cols_dates, scale_option):
@@ -167,7 +167,7 @@ def _render_evolucao_resultado(df_pivot, cols_dates, scale_option):
     fig.add_hline(y=0, line_dash="dot",
                   line_color="rgba(255,255,255,0.2)", line_width=1)
     apply_theme(fig, height=380, y_title=f"Valor ({scale_option})", x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 def _render_margens(df_pivot, cols_dates):
     st.subheader("Margens — Evolução Histórica", help=chart_tooltip("margens_dre"))
@@ -202,7 +202,7 @@ def _render_margens(df_pivot, cols_dates):
     fig.add_hline(y=0, line_dash="dot",
                   line_color="rgba(255,255,255,0.2)", line_width=1)
     apply_theme(fig, height=360, y_title="Margem (%)", y_suffix="%", x_is_category=True)
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 def _render_crescimento(df_pivot, cols_dates, empresa):
     receita = _get_conta(df_pivot, "3.01", cols_dates)
@@ -266,7 +266,7 @@ def _render_crescimento(df_pivot, cols_dates, empresa):
     fig.update_yaxes(ticksuffix="%", row=2, col=1)
     fig.update_annotations(x=0, xanchor="left", font_size=13, yshift=20)
 
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 def _render_funil_margens(df_pivot, cols_dates, scale_option):
     """Funil de margens no último período — Receita → Bruto → EBIT → Líquido."""
@@ -312,7 +312,7 @@ def _render_funil_margens(df_pivot, cols_dates, scale_option):
         font=dict(family=FONT_FAMILY, color=FONT_COLOR),
         height=380, margin=dict(t=20, b=20, l=120, r=20),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
     st.caption(f"Período: **{dt_ref}**")
 
 
@@ -359,7 +359,7 @@ def _render_custo_receita(df_pivot, cols_dates, scale_option):
         margin=dict(t=20, b=40, l=60, r=20), hovermode="x unified",
         hoverlabel=dict(bgcolor="rgba(19,41,61,0.92)", font=dict(color="#E8F1F2")),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 
 def render_dre_page():

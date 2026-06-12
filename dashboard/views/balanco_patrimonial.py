@@ -6,6 +6,7 @@ from database import get_dates_bp, get_bp_data_filtered
 from chart_theme import (
     BG_TRANSPARENT, GRID_COLOR, ZERO_LINE_COLOR,
     FONT_COLOR, FONT_COLOR_TITLE, PALETA, FONT_FAMILY, LEGEND_BG,
+    plot_chart,
 )
 from ai_analyst import (
     render_ai_panel,
@@ -80,7 +81,7 @@ def _render_sunburst_bp(df_ativo, df_passivo, cols_dates):
         font=dict(family=FONT_FAMILY, color=FONT_COLOR),
         height=430, margin=dict(t=10, b=10, l=10, r=10),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
     st.caption(f"📅 Período: **{dt_ref}** — clique nos segmentos para explorar.")
 
 
@@ -126,7 +127,7 @@ def _render_evolucao_categorias(df_ativo, cols_dates, scale_option):
         margin=dict(t=20, b=40, l=60, r=20), hovermode="x unified",
         hoverlabel=dict(bgcolor="rgba(19,41,61,0.92)", font=dict(color="#E8F1F2")),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 
 def _render_estrutura_capital(df_ativo, df_passivo, cols_dates, scale_option):
@@ -188,7 +189,7 @@ def _render_estrutura_capital(df_ativo, df_passivo, cols_dates, scale_option):
             showarrow=False, font=dict(color=FONT_COLOR, size=11),
         )],
     )
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
 
 def render_bp_page():
@@ -470,7 +471,7 @@ def render_bp_page():
         yshift=30        # Sobe o título 30 pixels para desgrudar do gráfico (ajuste conforme gosto)
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    plot_chart(fig)
 
     with st.expander("ℹ️ Entenda as Métricas de Crescimento"):
         st.markdown(f"""

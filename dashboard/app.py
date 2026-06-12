@@ -243,13 +243,10 @@ hr {
         color: #13293D;
         margin-bottom: 0.75rem;
     }
-    /* Container do heatmap: scroll lateral para não esmagar */
+    /* Gráficos: scroll lateral caso o conteúdo extravase */
     [data-testid="stPlotlyChart"] {
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch;
-    }
-    [data-testid="stPlotlyChart"] > div {
-        min-width: 560px;   /* largura mínima do heatmap antes de scrollar */
     }
 
     /* ── DataFrames: scroll horizontal ── */

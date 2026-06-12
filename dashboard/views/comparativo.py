@@ -159,7 +159,7 @@ def _render_evolucao_vs_setor(cnpj, nome_empresa, setor):
             line=dict(color=PALETA[0], width=3),
             marker=dict(size=8, color=PALETA[0],
                         line=dict(width=1.5, color="rgba(255,255,255,0.3)")),
-            fill="tozeroy", fillcolor="rgba(168,85,247,0.08)",
+            fill="tozeroy", fillcolor="rgba(144,202,249,0.18)",
             hovertemplate=f"{nome_empresa}: %{{y:.1f}}%<extra></extra>",
         ))
 
@@ -180,38 +180,26 @@ def _render_evolucao_vs_setor(cnpj, nome_empresa, setor):
                 x_is_category=True)
     st.plotly_chart(fig, use_container_width=True)
 
-def _render_heatmap_setores(df_all_bench, emp_row, nome_empresa, setor_empresa):
-    cols_hm   = [c for c in TODOS_INDICADORES if c in df_all_bench.columns]
-    labels_hm = [TODOS_INDICADORES[c][0] for c in cols_hm]
-    tipos_hm  = [TODOS_INDICADORES[c][1] for c in cols_hm]
-
-    df_setores = df_all_bench[["SETOR"] + cols_hm].dropna(subset=["SETOR"]).copy()
-
-    emp_row_dict = {"SETOR": f"★ {nome_empresa}"}
-    for c in cols_hm:
-        v = emp_row.get(c, None)
-        emp_row_dict[c] = float(v) if v is not None and not pd.isna(v) else None
-
-    # Empresa primeiro (índice 0) — com autorange=reversed no tema, índice 0 fica no topo
-    df_hm = pd.concat([pd.DataFrame([emp_row_dict]), df_setores], ignore_index=True)
-
-    # Z-Score por coluna
+def _render_heatmap_grupo(df_hm, cols, labels, tipos, nome_empresa, tab_key):
+    """Renderiza um heatmap para um subconjunto de colunas (um grupo de indicadores)."""
+    # Z-Score por coluna — negado quando menor é melhor
     z_cols = []
-    for col in cols_hm:
+    for col in cols:
         col_data = pd.to_numeric(df_hm[col], errors="coerce")
         mn, sd = col_data.mean(), col_data.std()
-        z_cols.append(((col_data - mn) / sd).fillna(0).tolist() if sd and not np.isnan(sd) else [0.0]*len(df_hm))
+        z = ((col_data - mn) / sd).fillna(0) if sd and not np.isnan(sd) else pd.Series([0.0]*len(df_hm))
+        if not TODOS_INDICADORES[col][2]:
+            z = -z
+        z_cols.append(z.tolist())
 
-    z_t = list(map(list, zip(*z_cols)))   # (n_setores, n_cols)
-
-    text_m = []
-    for _, row_hm in df_hm.iterrows():
-        text_m.append([fmt_val(row_hm.get(c), t) for c, t in zip(cols_hm, tipos_hm)])
+    z_t   = list(map(list, zip(*z_cols)))
+    text_m = [[fmt_val(row.get(c), t) for c, t in zip(cols, tipos)]
+               for _, row in df_hm.iterrows()]
 
     fig = go.Figure(go.Heatmap(
-        z=z_t, x=labels_hm, y=df_hm["SETOR"].tolist(),
+        z=z_t, x=labels, y=df_hm["SETOR"].tolist(),
         text=text_m, texttemplate="%{text}",
-        textfont=dict(size=9, color="#13293D"),
+        textfont=dict(size=10, color="#13293D"),
         colorscale="RdYlGn", zmid=0,
         colorbar=dict(
             title=dict(text="Z-Score", font=dict(color=FONT_COLOR, size=11)),
@@ -220,16 +208,49 @@ def _render_heatmap_setores(df_all_bench, emp_row, nome_empresa, setor_empresa):
         hovertemplate="<b>%{y}</b><br>%{x}: %{text}<extra></extra>",
     ))
 
-    # Destaque linha da empresa — índice 0 = topo (autorange=reversed no tema)
+    # Destaque linha da empresa
     fig.add_shape(
-        type="rect", x0=-0.5, x1=len(labels_hm)-0.5, y0=-0.5, y1=0.5,
+        type="rect", x0=-0.5, x1=len(labels)-0.5, y0=-0.5, y1=0.5,
         line=dict(color=PALETA[0], width=2.5),
         xref="x", yref="y",
     )
 
-    altura = max(380, len(df_hm) * 30 + 100)
+    altura = max(350, len(df_hm) * 34 + 80)
     apply_heatmap_theme(fig, height=altura)
-    st.plotly_chart(fig, use_container_width=True)
+    # margem esquerda menor quando há poucas colunas (leitura mobile)
+    fig.update_layout(margin=dict(t=20, b=60, l=160, r=40))
+    st.plotly_chart(fig, use_container_width=True, key=f"hm_{tab_key}")
+
+
+def _render_heatmap_setores(df_all_bench, emp_row, nome_empresa, setor_empresa):
+    # Monta df base com empresa no topo
+    all_cols = [c for c in TODOS_INDICADORES if c in df_all_bench.columns]
+    df_setores = df_all_bench[["SETOR"] + all_cols].dropna(subset=["SETOR"]).copy()
+    emp_row_dict = {"SETOR": f"★ {nome_empresa}"}
+    for c in all_cols:
+        v = emp_row.get(c, None)
+        emp_row_dict[c] = float(v) if v is not None and not pd.isna(v) else None
+    df_hm = pd.concat([pd.DataFrame([emp_row_dict]), df_setores], ignore_index=True)
+
+    # Uma aba por grupo de indicadores + aba final com todos
+    tab_labels = list(GRUPOS_INDICADORES.keys()) + ["Todos"]
+    tabs = st.tabs(tab_labels)
+
+    for tab, (grupo, indicadores) in zip(tabs, GRUPOS_INDICADORES.items()):
+        cols   = [c for c in indicadores if c in all_cols]
+        labels = [indicadores[c][0] for c in cols]
+        tipos  = [indicadores[c][1] for c in cols]
+        with tab:
+            if cols:
+                _render_heatmap_grupo(df_hm, cols, labels, tipos, nome_empresa, grupo)
+            else:
+                st.info("Dados não disponíveis para este grupo.")
+
+    with tabs[-1]:
+        all_labels = [TODOS_INDICADORES[c][0] for c in all_cols]
+        all_tipos  = [TODOS_INDICADORES[c][1] for c in all_cols]
+        st.caption("📱 Recomendado usar na horizontal ou no computador para visualizar todos os indicadores.")
+        _render_heatmap_grupo(df_hm, all_cols, all_labels, all_tipos, nome_empresa, "todos")
 
 def render_empresa_vs_empresa(empresas_selecionadas: dict, data_ref: str):
     st.subheader("Empresa vs Empresa")

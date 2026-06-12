@@ -1,33 +1,33 @@
 import plotly.graph_objects as go
 import plotly.io as pio
 
-# Brand palette — light theme
+# Brand palette — pastel blue-family light theme
 PALETA = [
-    "#1B98E0",  # Carolina Blue   — série principal
-    "#006494",  # Sapphire Blue   — série secundária
-    "#247BA0",  # Celadon Blue    — série terciária
-    "#13293D",  # Prussian Blue   — acento escuro
-    "#2DC4B2",  # Teal            — contraste complementar
-    "#F4845F",  # Coral           — acento quente
-    "#5C9EAD",  # Steel Blue      — neutro azulado
-    "#E76F51",  # Burnt Sienna    — negativo / alerta
+    "#90CAF9",  # Pastel Blue        — série principal
+    "#CE93D8",  # Pastel Lavender    — série secundária
+    "#80DEEA",  # Pastel Cyan        — série terciária / positivo
+    "#9FA8DA",  # Pastel Periwinkle  — acento índigo
+    "#A5D6A7",  # Pastel Sage Green  — contraste complementar
+    "#80CBC4",  # Pastel Teal        — acento azul-verde
+    "#B39DDB",  # Pastel Purple      — neutro violeta
+    "#EF9A9A",  # Pastel Red         — negativo / alerta
 ]
 
 CORES = {
-    "azul":        "#1B98E0",
-    "azul_escuro": "#006494",
-    "azul_medio":  "#247BA0",
+    "azul":        "#90CAF9",
+    "azul_escuro": "#5BA3C9",
+    "azul_medio":  "#80DEEA",
     "prussian":    "#13293D",
-    "teal":        "#2DC4B2",
-    "coral":       "#F4845F",
-    "steel":       "#5C9EAD",
-    "laranja":     "#E76F51",
-    "verde":       "#2DC4B2",
-    "vermelho":    "#E76F51",
-    "roxo":        "#006494",
-    "dourado":     "#F4845F",
-    "cinza":       "#6B8C9E",
-    "branco":      "#E8F1F2",
+    "teal":        "#80CBC4",
+    "coral":       "#EF9A9A",
+    "steel":       "#9FA8DA",
+    "laranja":     "#B39DDB",
+    "verde":       "#A5D6A7",
+    "vermelho":    "#EF9A9A",
+    "roxo":        "#CE93D8",
+    "dourado":     "#80DEEA",
+    "cinza":       "#B0BEC5",
+    "branco":      "#F5F5F5",
 }
 
 BG_TRANSPARENT  = "rgba(0,0,0,0)"

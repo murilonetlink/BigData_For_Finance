@@ -220,7 +220,7 @@ def _render_caixa_acumulado(df_pivot, cols_dates, scale_option):
         name="FCO Acumulado",
         mode="lines+markers",
         fill="tozeroy",
-        fillcolor="rgba(168,85,247,0.08)",
+        fillcolor="rgba(144,202,249,0.18)",
         line=dict(color=PALETA[0], width=3),
         marker=dict(size=8, color=PALETA[0],
                     line=dict(width=1.5, color="rgba(255,255,255,0.3)")),

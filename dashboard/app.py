@@ -9,6 +9,7 @@ from views.indicadores_financeiros import render_indicadores_page
 from views.comparativo import render_comparativo_page
 from views.dre import render_dre_page
 from views.dfc import render_dfc_page
+from views.sobre import render_sobre_page
 
 st.set_page_config(**PAGE_CONFIG)
 
@@ -296,7 +297,7 @@ with st.sidebar:
     st.caption("Disciplina: Big Data for Finance - FAE")
     st.markdown("---")
     pagina = st.radio( "Navegação",
-        options=[ " Balanço Patrimonial", " DRE", " DFC", " Indicadores Financeiros", " Comparativo de Empresas",
+        options=[ " Balanço Patrimonial", " DRE", " DFC", " Indicadores Financeiros", " Comparativo de Empresas", " Sobre o Projeto",
         ],
         index=0,
     )
@@ -337,6 +338,8 @@ elif pagina == " Indicadores Financeiros":
     render_indicadores_page()
 elif pagina == " Comparativo de Empresas":
     render_comparativo_page()
+elif pagina == " Sobre o Projeto":
+    render_sobre_page()
 
 st.markdown("---")
 c1, c2 = st.columns([3, 1])

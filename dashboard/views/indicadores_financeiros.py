@@ -192,7 +192,7 @@ def render_grafico_resultado(df):
         marker=dict(size=8, color=CORES["roxo"],
                     line=dict(width=2, color="rgba(255,255,255,0.3)")),
         fill="tozeroy",
-        fillcolor="rgba(168,85,247,0.10)",
+        fillcolor="rgba(206,147,216,0.18)",
         text=[f"R${v:,.1f}M" for v in df_p["LL"]],
         textposition="top center",
         textfont=dict(size=10, color=CORES["roxo"]),
@@ -276,7 +276,8 @@ def render_grafico_intangivel(df):
         name="Intangível (MM)",
         marker=dict(
             color=df_p["INTANG_MM"],
-            colorscale=[[0, "rgba(168,85,247,0.4)"], [1, "rgba(168,85,247,0.9)"]],
+            colorscale=[[0, "rgba(159,168,218,0.4)"], [1, "rgba(159,168,218,0.9)"]],
+
             showscale=False,
             line=dict(width=0),
         ),
